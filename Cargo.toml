@@ -5,4 +5,6 @@ edition = "2024"
 
 [dependencies]
 tree-sitter = "0.26.5"
+tree-sitter-elixir = "0.3.4"
+tree-sitter-python = "0.25.0"
 tree-sitter-rust = "0.24.0"
