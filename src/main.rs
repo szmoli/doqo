@@ -70,6 +70,14 @@ impl CommentExtractor {
         self.parser.set_language(&grammar).ok();
         let tree = self.parser.parse(source, None).unwrap();
         println!("tree: {:?}", tree);
+
+        // TODO: rc, arc
+        // TODO: lambdába kiszervezni
+        // Vagy traiteken keresztüli kezelés
+        /*
+            core: cargo static lib -> ide regisztrálnak a nyelv cratek
+            lang: core-ra hivatkozik, egyelőre libek, aztán majd refactor max
+         */
         let query = Query::new(&grammar, lang.comment_query().unwrap()).expect("invalid query");
         let mut matches = self.cursor.matches(&query, tree.root_node(), source.as_bytes());
         let mut comments = Vec::new();
