@@ -9,6 +9,9 @@ pub struct Session {
 
   /// Language plugins for the session.
   pub language_registry: LanguageRegistry,
+
+  /// Source files of the project.
+  pub source_files: Vec<String>,
 }
 
 impl Session {
@@ -16,6 +19,7 @@ impl Session {
         Self {
             symbol_table: SymbolTable::new(),
             language_registry: LanguageRegistry::new(),
+            source_files: Vec::new(),
         }
     }
 }
@@ -43,7 +47,7 @@ impl SymbolTable {
     }
 
     /// Get the internal ID mapped to the FQID.
-    pub fn symbol_id(&self, fqid: &String) -> Option<&usize> {
+    pub fn symbol_id(&self, fqid: &String) -> Option<&SymbolId> {
         self.fqid_index.get(fqid)
     }
 
@@ -71,13 +75,23 @@ impl SymbolTable {
 /// Q: should I store a path of scopes and a name and combine them into an FQID?
 pub struct Symbol {
   pub id: SymbolId,
-  pub fqid: String,
-  pub name: String, // can be derived from FQID I think
+
+  /// Path of the scopes leading to the symbol.
+  pub path: Vec<String>,
+
+  /// Name of the symbol.
+  pub name: String, 
 
   pub parent: Option<SymbolId>,
   pub children: Vec<SymbolId>,
+}
 
-  // TODO: pub location: ?,
+impl Symbol {
+    pub fn fqid(&self) -> String {
+        let path_str = self.path.join("::").to_string();
+        let fqid = path_str + "::" + self.name.as_str();
+        fqid
+    }
 }
 
 /// Holds the known language plugins.

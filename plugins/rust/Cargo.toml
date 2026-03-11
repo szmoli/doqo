@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 common = { workspace = true }
+tree-sitter = { workspace = true }
 tree-sitter-rust = "0.24.0"

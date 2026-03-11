@@ -24,6 +24,10 @@ dependencies = [
 [[package]]
 name = "cli"
 version = "0.1.0"
+dependencies = [
+ "common",
+ "rust",
+]
 
 [[package]]
 name = "common"
@@ -35,6 +39,9 @@ dependencies = [
 [[package]]
 name = "elixir"
 version = "0.1.0"
+dependencies = [
+ "common",
+]
 
 [[package]]
 name = "equivalent"
@@ -88,12 +95,15 @@ dependencies = [
 [[package]]
 name = "python"
 version = "0.1.0"
+dependencies = [
+ "common",
+]
 
 [[package]]
 name = "quote"
-version = "1.0.44"
+version = "1.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21b2ebcf727b7760c461f091f9f0f539b77b8e87f2fd88131e7f1b433b3cece4"
+checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
 dependencies = [
  "proc-macro2",
 ]
@@ -130,6 +140,11 @@ checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
 [[package]]
 name = "rust"
 version = "0.1.0"
+dependencies = [
+ "common",
+ "tree-sitter",
+ "tree-sitter-rust",
+]
 
 [[package]]
 name = "serde"
@@ -216,6 +231,16 @@ name = "tree-sitter-language"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "009994f150cc0cd50ff54917d5bc8bffe8cad10ca10d81c34da2ec421ae61782"
+
+[[package]]
+name = "tree-sitter-rust"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b9b18034c684a2420722be8b2a91c9c44f2546b631c039edf575ccba8c61be1"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
 
 [[package]]
 name = "unicode-ident"
