@@ -9,5 +9,5 @@ fn main() {
 
     //println!("{}", source);
 
-    rust_plugin.processor().extract_symbols(&source);
+    rust_plugin.processor().process(&source);
 }

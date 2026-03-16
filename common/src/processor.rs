@@ -1,30 +1,43 @@
-use tree_sitter::Parser;
 use crate::Symbol;
+use tree_sitter::{Node, Parser};
+
+pub struct ProcessingContext {
+  pub namespace_stack: Vec<String>,
+  pub symbols: Vec<Symbol>,
+  pub comment_buffer: String,
+}
+
+impl ProcessingContext {
+  pub fn new() -> Self {
+    Self {
+      namespace_stack: Vec::new(),
+      symbols: Vec::new(),
+      comment_buffer: String::new(),
+    }
+  }
+}
 
 /// Processes a specific language into symbols.
 pub trait LanguageProcessor {
-    /*
-    Konzi jegyzetek:
-    - workspace leíró struct, pl: git full elérési útvonalakkal
-    - kinyeri a symbolokat és a hozzá tapadó kommenteket
-    - clean comments
-    - scopeok kezelése (stackoverflows nestelt cucc, fqid -> symbol)
-    */
-
     /// Get the Tree Sitter grammar for the language.
     fn language(&self) -> tree_sitter::Language;
 
     /// Extract the symbols from a source string.
     //fn extract_symbols(&self, source: &str) -> Vec<Symbol>;
-    fn extract_symbols(&self, source: &str) -> Vec<Symbol> {
-        //let mut stack: Vec<String> = Vec::new();
+    fn process(&self, source: &str) -> Vec<Symbol> {
+        let mut context = ProcessingContext::new();
         let mut parser = Parser::new();
-        parser.set_language(&self.language()).expect("Failed to set parser language.");
+        parser
+            .set_language(&self.language())
+            .expect("Failed to set parser language.");
 
         let tree = parser.parse(source, None).expect("Failed to parse tree.");
         let symbols = Vec::new();
-        let mut cursor = tree.walk();
-        
+        //let mut cursor = tree.walk();
+
+        self.walk_recursive(tree.root_node(), source, &mut context);
+
+        /*
         if cursor.goto_first_child() {
             loop {
                 let node = cursor.node();
@@ -39,25 +52,31 @@ pub trait LanguageProcessor {
                 }
                 println!("{}", node_text);
                 println!();
-                
+
                 if !cursor.goto_next_sibling() {
                     break;
                 }
             }
         }
+        */
 
         symbols
     }
 
-    // Determines whether a node is a symbol or not.
-    //fn is_symbol(&self, node: Node) -> bool;
+    fn walk_recursive(&self, node: Node, source: &str, context: &mut ProcessingContext) {
+      let pushed_stack = self.handle_node(node, source, context);
 
-    // Gets the name of the given node.
-    //fn node_name(&self, node: Node, source: &str) -> String;
+      let mut cursor = node.walk();
+      for child in node.named_children(&mut cursor) {
+        self.walk_recursive(child, source, context);
+      }
 
-    // Determines whether a node is a comment or not.
-    //fn is_comment(&self, node: Node) -> bool;
+      if pushed_stack {
+        context.namespace_stack.pop();
+      }
+    }
 
-    // Determines where a comment should stick.
-    //fn sticks_to(&self, node: Node, source: &str) -> StickLocation;
+    fn handle_node(&self, node: Node, source: &str, context: &mut ProcessingContext) -> bool;
+
+    fn create_symbol(&self, node: Node, source: &str, context: &ProcessingContext) -> Symbol;
 }

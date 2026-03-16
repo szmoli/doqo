@@ -1,5 +1,5 @@
 use std::{collections::HashSet};
-use common::{LanguagePlugin, LanguageProcessor};
+use common::{LanguagePlugin, LanguageProcessor, Symbol};
 use tree_sitter_rust;
 
 pub struct RustPlugin;
@@ -10,6 +10,29 @@ impl LanguageProcessor for RustProcessor {
         tree_sitter_rust::LANGUAGE.into()
     }
 
+    fn handle_node(&self, node: tree_sitter::Node, source: &str, context: &mut common::processor::ProcessingContext) -> bool {
+      match node.kind() {
+        "function_item" | "struct_item" | "mod_item" => {
+            let symbol = self.create_symbol(node, source, context);
+            println!("{:?}", symbol);
+            context.symbols.push(symbol);
+            true 
+        }
+        "line_comment" | "block_comment" => {
+            context.comment_buffer += &source[node.byte_range()].to_string();
+            false
+        }
+        _ => false 
+      }
+    }
+    
+    fn create_symbol(&self, node: tree_sitter::Node, source: &str, context: &common::processor::ProcessingContext) -> common::Symbol {
+        //todo!()
+        let node_source = &source[node.byte_range()];
+        let node_name = format!("node{}", context.namespace_stack.len());
+        Symbol::new(node_name, node_source)
+    }
+    
     /*
     fn is_symbol(&self, node: tree_sitter::Node) -> bool {
         todo!()

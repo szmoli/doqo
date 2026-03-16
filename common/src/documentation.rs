@@ -1,8 +1,10 @@
+#[derive(Debug)]
 pub struct Documentation {
   pub content: String,
   pub metadata: Vec<Metadata>,
 }
 
+#[derive(Debug)]
 pub struct Metadata;
 
 // Possible locations to stick a comment to.

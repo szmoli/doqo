@@ -51,8 +51,9 @@ impl SymbolTable {
 /// Holds infromation about a single symbol in the source.
 /// 
 /// Q: should I store a path of scopes and a name and combine them into an FQID?
+#[derive(Debug)]
 pub struct Symbol {
-  pub id: SymbolId,
+  pub id: Option<SymbolId>,
 
   /// Path of the scopes leading to the symbol.
   pub namespace: Vec<String>,
@@ -60,7 +61,7 @@ pub struct Symbol {
   /// Name of the symbol.
   pub name: String, 
 
-  pub documentation: Documentation,
+  pub documentation: Option<Documentation>,
   pub source: String,
 
   pub parent: Option<SymbolId>,
@@ -68,7 +69,22 @@ pub struct Symbol {
 }
 
 impl Symbol {
+    pub fn new(name: String, source: &str) -> Self {
+      Self {
+        id: None,
+        namespace: Vec::new(),
+        name: name.to_string(),
+        documentation: None,
+        source: source.to_string(),
+        parent: None,
+        children: Vec::new(),
+      }
+    }
+
     pub fn fqid(&self) -> String {
+        if self.namespace.is_empty() {
+          return self.name.clone();
+        }
         let path_str = self.namespace.join("::").to_string();
         let fqid = path_str + "::" + self.name.as_str();
         fqid
