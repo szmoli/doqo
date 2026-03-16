@@ -1,4 +1,6 @@
 use std::collections::{HashMap, HashSet};
+use tree_sitter::{Node, Parser};
+//use uuid::Uuid;
 
 /// A session for multi-language projects
 /// 
@@ -77,10 +79,13 @@ pub struct Symbol {
   pub id: SymbolId,
 
   /// Path of the scopes leading to the symbol.
-  pub path: Vec<String>,
+  pub namespace: Vec<String>,
 
   /// Name of the symbol.
   pub name: String, 
+
+  pub documentation: Documentation,
+  pub source: String,
 
   pub parent: Option<SymbolId>,
   pub children: Vec<SymbolId>,
@@ -88,11 +93,18 @@ pub struct Symbol {
 
 impl Symbol {
     pub fn fqid(&self) -> String {
-        let path_str = self.path.join("::").to_string();
+        let path_str = self.namespace.join("::").to_string();
         let fqid = path_str + "::" + self.name.as_str();
         fqid
     }
 }
+
+pub struct Documentation {
+    pub content: String,
+    pub metadata: Vec<Metadata>,
+}
+
+pub struct Metadata;
 
 /// Holds the known language plugins.
 pub struct LanguageRegistry {
@@ -106,7 +118,7 @@ impl LanguageRegistry {
 
     /// Register a language plugin.
     pub fn register(&mut self, support: Box<dyn LanguagePlugin>) {
-        self.plugins.push(support);()
+        self.plugins.push(support);
     }
 
     /// Get the language plugin mapped to the file extension.
@@ -130,11 +142,22 @@ pub trait LanguagePlugin {
   /// Human readable name of the language (eg. "Rust", "Python", "Elixir")
   fn name(&self) -> &'static str;
 
+  fn id(&self) -> &'static str;
+
+  fn symbol_kinds(&self) -> HashSet<&'static str>;
+
   /// File extensions associated with the language (eg. ".rs", ".py", ".ex")
   fn extensions(&self) -> HashSet<&'static str>;
 
   /// Processor for the specific language
   fn processor(&self) -> Box<dyn LanguageProcessor>;
+}
+
+/// Possible locations to stick a comment to.
+pub enum StickLocation {
+    ParentSymbol,   // Sticks to the parent
+    NextSymbol,     // Sticks to the following symbol
+    None            // Is ignored
 }
 
 /// Processes a specific language into symbols.
@@ -151,5 +174,49 @@ pub trait LanguageProcessor {
     fn language(&self) -> tree_sitter::Language;
 
     /// Extract the symbols from a source string.
-    fn extract_symbols(&self, source: &str) -> Vec<Symbol>;
+    //fn extract_symbols(&self, source: &str) -> Vec<Symbol>;
+    fn extract_symbols(&self, source: &str) -> Vec<Symbol> {
+        //let mut stack: Vec<String> = Vec::new();
+        let mut parser = Parser::new();
+        parser.set_language(&self.language()).expect("Failed to set parser language.");
+
+        let tree = parser.parse(source, None).expect("Failed to parse tree.");
+        let symbols = Vec::new();
+        let mut cursor = tree.walk();
+        
+        if cursor.goto_first_child() {
+            loop {
+                let node = cursor.node();
+                let node_text = &source[node.byte_range()];
+
+                println!("{:?}", node);
+                println!("Child count: {}", node.child_count());
+                println!("Named child count: {}", node.named_child_count());
+                println!("Children:");
+                for i in 0..node.child_count() {
+                    println!("\t{:?}", node.child(i.try_into().unwrap()));
+                }
+                println!("{}", node_text);
+                println!();
+                
+                if !cursor.goto_next_sibling() {
+                    break;
+                }
+            }
+        }
+
+        symbols
+    }
+
+    /// Determines whether a node is a symbol or not.
+    fn is_symbol(&self, node: Node) -> bool;
+
+    /// Gets the name of the given node.
+    fn node_name(&self, node: Node, source: &str) -> String;
+
+    /// Determines whether a node is a comment or not.
+    fn is_comment(&self, node: Node) -> bool;
+
+    /// Determines where a comment should stick.
+    fn sticks_to(&self, node: Node, source: &str) -> StickLocation;
 }

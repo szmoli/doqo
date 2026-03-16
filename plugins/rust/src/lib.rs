@@ -1,7 +1,6 @@
-use std::collections::HashSet;
-use common::{LanguagePlugin, LanguageProcessor, Symbol};
+use std::{collections::HashSet};
+use common::{LanguagePlugin, LanguageProcessor};
 use tree_sitter_rust;
-use tree_sitter::{Parser};
 
 pub struct RustPlugin;
 pub struct RustProcessor;
@@ -10,27 +9,21 @@ impl LanguageProcessor for RustProcessor {
     fn language(&self) -> tree_sitter::Language {
         tree_sitter_rust::LANGUAGE.into()
     }
-
-    fn extract_symbols(&self, source: &str) -> Vec<Symbol> {
-        let mut parser = Parser::new();
-        parser.set_language(&self.language()).expect("Failed to set parser language.");
-
-        let tree = parser.parse(source, None).expect("Failed to parse tree.");
-        let symbols = Vec::new();
-        let mut cursor = tree.walk();
-        
-        if cursor.goto_first_child() {
-            loop {
-                let node = cursor.node();
-                println!("{:?}", node);
-                
-                if !cursor.goto_next_sibling() {
-                    break;
-                }
-            }
-        }
-
-        symbols
+    
+    fn is_symbol(&self, node: tree_sitter::Node) -> bool {
+        todo!()
+    }
+    
+    fn node_name(&self, node: tree_sitter::Node, source: &str) -> String {
+        todo!()
+    }
+    
+    fn is_comment(&self, node: tree_sitter::Node) -> bool {
+        todo!()
+    }
+    
+    fn sticks_to(&self, node: tree_sitter::Node, source: &str) -> common::StickLocation {
+        todo!()
     }
 }
 
@@ -45,5 +38,15 @@ impl LanguagePlugin for RustPlugin {
 
     fn processor(&self) -> Box<dyn LanguageProcessor> {
         Box::new(RustProcessor)
+    }
+    
+    fn id(&self) -> &'static str {
+        "rust"
+    }
+    
+    fn symbol_kinds(&self) -> HashSet<&'static str> {
+        // TODO
+        HashSet::from(["struct"])
+        //kinds.iter().map)
     }
 }
