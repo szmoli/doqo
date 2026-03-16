@@ -9,7 +9,8 @@ impl LanguageProcessor for RustProcessor {
     fn language(&self) -> tree_sitter::Language {
         tree_sitter_rust::LANGUAGE.into()
     }
-    
+
+    /*
     fn is_symbol(&self, node: tree_sitter::Node) -> bool {
         todo!()
     }
@@ -25,6 +26,7 @@ impl LanguageProcessor for RustProcessor {
     fn sticks_to(&self, node: tree_sitter::Node, source: &str) -> common::StickLocation {
         todo!()
     }
+    */
 }
 
 impl LanguagePlugin for RustPlugin {
