@@ -4,6 +4,15 @@ pub struct Documentation {
   pub metadata: Vec<Metadata>,
 }
 
+impl Documentation {
+  pub fn new(content: String) -> Self {
+    Self {
+      content: content,
+      metadata: Vec::new(),
+    }
+  }
+}
+
 #[derive(Debug)]
 pub struct Metadata;
 

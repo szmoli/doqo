@@ -1,19 +1,43 @@
-use crate::Symbol;
+use crate::{Documentation, Symbol, SymbolId, SymbolTable};
 use tree_sitter::{Node, Parser};
 
-pub struct ProcessingContext {
+pub struct ProcessingContext<'a> {
   pub namespace_stack: Vec<String>,
-  pub symbols: Vec<Symbol>,
+  //pub symbols: Vec<Symbol>,
   pub comment_buffer: String,
+  pub symbol_table: &'a mut SymbolTable,
+  pub parent_id_stack: Vec<SymbolId>,
 }
 
-impl ProcessingContext {
-  pub fn new() -> Self {
+impl<'a> ProcessingContext<'a> {
+  pub fn new(symbol_table: &'a mut SymbolTable) -> Self {
     Self {
       namespace_stack: Vec::new(),
-      symbols: Vec::new(),
+      //symbols: Vec::new(),
       comment_buffer: String::new(),
+      symbol_table: symbol_table,
+      parent_id_stack: Vec::new(),
     }
+  }
+
+  pub fn register_symbol(&mut self, mut symbol: Symbol) -> SymbolId {
+    symbol.parent = self.parent_id_stack.last().copied();
+
+    // TODO: work out comment attaching logic
+    /*
+    if !self.comment_buffer.is_empty() {
+      symbol.documentation = Some(Documentation::new(self.comment_buffer.clone()));
+      self.comment_buffer.clear();
+    }
+    */
+
+    let id = self.symbol_table.register_symbol(symbol);
+
+    if let Some(&parent_id) = self.parent_id_stack.last() {
+      self.symbol_table.link_child(parent_id, id);
+    }
+
+    id
   }
 }
 
@@ -23,44 +47,16 @@ pub trait LanguageProcessor {
     fn language(&self) -> tree_sitter::Language;
 
     /// Extract the symbols from a source string.
-    //fn extract_symbols(&self, source: &str) -> Vec<Symbol>;
-    fn process(&self, source: &str) -> Vec<Symbol> {
-        let mut context = ProcessingContext::new();
+    fn process(&self, source: &str, symbol_table: &mut SymbolTable) {
+        let mut context = ProcessingContext::new(symbol_table);
+
         let mut parser = Parser::new();
         parser
             .set_language(&self.language())
             .expect("Failed to set parser language.");
 
         let tree = parser.parse(source, None).expect("Failed to parse tree.");
-        let symbols = Vec::new();
-        //let mut cursor = tree.walk();
-
         self.walk_recursive(tree.root_node(), source, &mut context);
-
-        /*
-        if cursor.goto_first_child() {
-            loop {
-                let node = cursor.node();
-                let node_text = &source[node.byte_range()];
-
-                println!("{:?}", node);
-                println!("Child count: {}", node.child_count());
-                println!("Named child count: {}", node.named_child_count());
-                println!("Children:");
-                for i in 0..node.child_count() {
-                    println!("\t{:?}", node.child(i.try_into().unwrap()));
-                }
-                println!("{}", node_text);
-                println!();
-
-                if !cursor.goto_next_sibling() {
-                    break;
-                }
-            }
-        }
-        */
-
-        symbols
     }
 
     fn walk_recursive(&self, node: Node, source: &str, context: &mut ProcessingContext) {
@@ -73,10 +69,13 @@ pub trait LanguageProcessor {
 
       if pushed_stack {
         context.namespace_stack.pop();
+        context.parent_id_stack.pop();
       }
     }
 
     fn handle_node(&self, node: Node, source: &str, context: &mut ProcessingContext) -> bool;
 
-    fn create_symbol(&self, node: Node, source: &str, context: &ProcessingContext) -> Symbol;
+    fn create_symbol(&self, node: Node, source: &str, context: &mut ProcessingContext) -> Symbol;
+
+    fn get_symbol_name(&self, node: Node, source: &str) -> String;
 }

@@ -1,5 +1,6 @@
 pub mod plugin;
 pub mod processor;
+pub mod utility;
 
 mod documentation;
 mod session;

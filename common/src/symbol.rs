@@ -10,7 +10,7 @@ pub type SymbolId = usize;
 /// The symbol table. Maps IDs or FQIDs to Symbols.
 /// The current_id starts from 0 and is incremented every time a new symbol is registered. 
 pub struct SymbolTable {
-  symbols: HashMap<SymbolId, Symbol>,
+  pub symbols: HashMap<SymbolId, Symbol>,
   fqid_index: HashMap<String, SymbolId>,
   current_id: SymbolId,
 }
@@ -31,9 +31,19 @@ impl SymbolTable {
 
     /// Register a new symbol.
     /// Side effect: incements current_id by one.
-    pub fn register_symbol(&mut self, symbol: Symbol) {
-        self.symbols.insert(self.current_id, symbol);
+    pub fn register_symbol(&mut self, symbol: Symbol) -> SymbolId {
+        let id = self.current_id;
+        self.symbols.insert(id, symbol);
         self.current_id += 1;
+        id
+    }
+
+    pub fn link_child(&mut self, parent_id: SymbolId, child_id: SymbolId) {
+      if let Some(parent) = self.symbols.get_mut(&parent_id) {
+        if !parent.children.contains(&child_id) {
+          parent.children.push(child_id);
+        }
+      }
     }
 
     /// Get the Symbol mapped to the FQID.
@@ -60,6 +70,7 @@ pub struct Symbol {
 
   /// Name of the symbol.
   pub name: String, 
+  pub kind: String,
 
   pub documentation: Option<Documentation>,
   pub source: String,
@@ -69,12 +80,13 @@ pub struct Symbol {
 }
 
 impl Symbol {
-    pub fn new(name: String, source: &str) -> Self {
+    pub fn new(name: String, kind: String, namespace: Vec<String>, source: &str, documentation: Option<Documentation>) -> Self {
       Self {
         id: None,
-        namespace: Vec::new(),
+        namespace: namespace,
         name: name.to_string(),
-        documentation: None,
+        kind: kind,
+        documentation: documentation,
         source: source.to_string(),
         parent: None,
         children: Vec::new(),
