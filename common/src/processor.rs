@@ -1,3 +1,5 @@
+use std::io;
+
 use crate::{Documentation, Symbol, SymbolId, SymbolTable};
 use tree_sitter::{Node, Parser};
 
@@ -13,7 +15,6 @@ impl<'a> ProcessingContext<'a> {
   pub fn new(symbol_table: &'a mut SymbolTable) -> Self {
     Self {
       namespace_stack: Vec::new(),
-      //symbols: Vec::new(),
       comment_buffer: String::new(),
       symbol_table: symbol_table,
       parent_id_stack: Vec::new(),
@@ -24,12 +25,12 @@ impl<'a> ProcessingContext<'a> {
     symbol.parent = self.parent_id_stack.last().copied();
 
     // TODO: work out comment attaching logic
-    /*
+    
     if !self.comment_buffer.is_empty() {
       symbol.documentation = Some(Documentation::new(self.comment_buffer.clone()));
       self.comment_buffer.clear();
     }
-    */
+    
 
     let id = self.symbol_table.register_symbol(symbol);
 
@@ -60,6 +61,10 @@ pub trait LanguageProcessor {
     }
 
     fn walk_recursive(&self, node: Node, source: &str, context: &mut ProcessingContext) {
+      //let mut input = String::new();
+      //io::stdin().read_line(&mut input).unwrap();
+      //println!("{:?}", node);
+
       let pushed_stack = self.handle_node(node, source, context);
 
       let mut cursor = node.walk();

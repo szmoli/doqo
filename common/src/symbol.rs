@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::Documentation;
+use crate::{Documentation};
 
 /// The internal ID of a symbol.
 /// 
@@ -55,6 +55,12 @@ impl SymbolTable {
     /// Get the Symbol mapped to the internal ID.
     pub fn find_by_id(&self, id: SymbolId) -> Option<&Symbol> {
         self.symbols.get(&id)
+    }
+
+    pub fn attach_documentation(&mut self, id: SymbolId, documentation: Documentation) {
+      if let Some(symbol) = self.symbols.get_mut(&id) {
+        symbol.documentation = Some(documentation);
+      }
     }
 }
 

@@ -19,14 +19,15 @@ impl LanguageProcessor for RustProcessor {
         context: &mut common::processor::ProcessingContext,
     ) -> bool {
         match node.kind() {
-            "function_item" | "struct_item" | "mod_item" | "impl_item" | "trait_item" | "enum_item" => {
+            "function_item" | "struct_item" | "mod_item" | "impl_item" | "trait_item" | "enum_item" | "const_item" | "field_declaration" => {
                 let symbol = self.create_symbol(node, source, context);
 
-                println!("{:?}", symbol);
-                print_named_children(node, source);
-                println!();
+                //println!("{:?}", symbol);
+                //print_named_children(node, source);
+                //println!();
 
                 let symbol_name = symbol.name.clone();
+                
                 let symbol_id = context.register_symbol(symbol);
 
                 context.namespace_stack.push(symbol_name);
@@ -35,12 +36,30 @@ impl LanguageProcessor for RustProcessor {
 
                 true
             }
+            //"doc_comment" => {
             "line_comment" | "block_comment" => {
-                context.comment_buffer.push_str(&source[node.byte_range()].to_string());
+                let text = source[node.byte_range()].trim();
+
+                if text.starts_with("//!") || text.starts_with("/*!") {
+                    // INNER DOCS: Attach to the current active parent
+                    if let Some(&parent_id) = context.parent_id_stack.last() {
+                        context.symbol_table.attach_documentation(parent_id, Documentation::new(text.to_string()));
+                    }
+                } else if text.starts_with("///") || text.starts_with("/**") {
+                    // OUTER DOCS: Buffer for the next sibling
+                    context.comment_buffer.push_str(text);
+                }
+
+                //context.comment_buffer.push_str(&source[node.byte_range()].to_string());
 
                 false
             }
             _ => {
+              //println!("comment_buffer:");
+              //println!("{}", context.comment_buffer);
+              //context.comment_buffer.clear();
+              //println!("cleared comment_buffer");
+
               false
             }
         }
@@ -77,7 +96,7 @@ impl LanguageProcessor for RustProcessor {
         let trait_node = node.child_by_field_name("trait");
         let type_node = node.child_by_field_name("type");
 
-        println!("{:?}, {:?}, {:?}", identifier_node, trait_node, type_node);
+        //println!("{:?}, {:?}, {:?}", identifier_node, trait_node, type_node);
 
         match (identifier_node, trait_node, type_node) {
             (Some(identifier_node), None, None) => {

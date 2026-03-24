@@ -3,7 +3,7 @@
 //! It should be associated with the "root" or the file itself.
 
 /// A top-level constant.
-pub const GLOBAL_TIMEOUT: u64 = 30;
+pub const GLOBAL_TIMEOUT: u64 = 30; // regular line comment
 
 /// The primary data structure for the test suite.
 /// This struct has generics and lifetimes to test your string parsing.
