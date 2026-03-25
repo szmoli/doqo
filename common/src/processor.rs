@@ -3,6 +3,9 @@ use std::io;
 use crate::{Documentation, Symbol, SymbolId, SymbolTable};
 use tree_sitter::{Node, Parser};
 
+pub type NodeHandler = fn(node: Node, source: &str, &mut ProcessingContext) -> bool;
+
+//pub struct ProcessingContext<'a> {
 pub struct ProcessingContext<'a> {
   pub namespace_stack: Vec<String>,
   //pub symbols: Vec<Symbol>,
@@ -12,7 +15,9 @@ pub struct ProcessingContext<'a> {
 }
 
 impl<'a> ProcessingContext<'a> {
+//impl ProcessingContext {
   pub fn new(symbol_table: &'a mut SymbolTable) -> Self {
+  //pub fn new() -> Self {
     Self {
       namespace_stack: Vec::new(),
       comment_buffer: String::new(),

@@ -1,7 +1,7 @@
 use std::fs;
 
 use common::{LanguagePlugin, SymbolTable};
-use rust::{RustPlugin};
+use rust::plugin::RustPlugin;
 
 fn main() {
     let mut symbol_table = SymbolTable::new();
