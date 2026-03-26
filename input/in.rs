@@ -51,6 +51,10 @@ pub mod internal_api {
         }
     }
 
+    impl Worker for HiddenManager {
+
+    }
+
     /// Sub-nesting: A module inside a module.
     pub mod ultra_private {
         /// A deeply nested function.

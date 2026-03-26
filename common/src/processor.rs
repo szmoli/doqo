@@ -1,17 +1,17 @@
-use std::io;
+use std::{io, task::Context};
 
-use crate::{Documentation, Symbol, SymbolId, SymbolTable};
+use crate::{Documentation, Symbol, SymbolId, SymbolTable, symbol};
 use tree_sitter::{Node, Parser};
 
 pub type NodeHandler = fn(node: Node, source: &str, &mut ProcessingContext) -> bool;
 
 //pub struct ProcessingContext<'a> {
 pub struct ProcessingContext<'a> {
-  pub namespace_stack: Vec<String>,
+  namespace_stack: Vec<String>,
   //pub symbols: Vec<Symbol>,
-  pub comment_buffer: String,
-  pub symbol_table: &'a mut SymbolTable,
-  pub parent_id_stack: Vec<SymbolId>,
+  comment_buffer: String,
+  symbol_table: &'a mut SymbolTable,
+  parent_id_stack: Vec<SymbolId>,
 }
 
 impl<'a> ProcessingContext<'a> {
@@ -26,6 +26,53 @@ impl<'a> ProcessingContext<'a> {
     }
   }
 
+  /// Makes a new Documentation from the comment buffer.
+  /// Side effect: clears the comment buffer.
+  pub fn make_documentation(&mut self) -> Option<Documentation> {
+    if !self.comment_buffer.is_empty() {
+      let raw = self.comment_buffer.clone();
+      self.comment_buffer.clear();
+      Some(Documentation::new(raw))
+    }
+    else {
+      None
+    }
+  }
+
+  pub fn namespace(&self) -> Vec<String> {
+    self.namespace_stack.clone()
+  }
+
+  pub fn push(&mut self, id: SymbolId, name: String) {
+    self.namespace_stack.push(name);
+    self.parent_id_stack.push(id);
+    debug_assert_eq!(self.parent_id_stack.len(), self.namespace_stack.len());
+  }
+
+  pub fn pop(&mut self) -> Option<(SymbolId, String)> {
+    let result = self.parent_id_stack.pop().zip(self.namespace_stack.pop());
+    debug_assert_eq!(self.parent_id_stack.len(), self.namespace_stack.len());
+    result
+  }
+
+  pub fn register_symbol(&mut self, mut symbol: Symbol) -> SymbolId {
+    let parent_id = self.parent_id_stack.last().copied();
+    symbol.parent = parent_id;
+
+    let id = self.symbol_table.register_symbol(symbol);
+
+    if let Some(parent_id) = parent_id {
+      self.symbol_table.link_child(parent_id, id);
+    }
+
+    id
+  }
+
+  pub fn append_comment(&mut self, text: &str) {
+    self.comment_buffer.push_str(text);
+  }
+
+  /*
   pub fn register_symbol(&mut self, mut symbol: Symbol) -> SymbolId {
     symbol.parent = self.parent_id_stack.last().copied();
 
@@ -45,6 +92,7 @@ impl<'a> ProcessingContext<'a> {
 
     id
   }
+  */
 }
 
 /// Processes a specific language into symbols.
@@ -78,14 +126,13 @@ pub trait LanguageProcessor {
       }
 
       if pushed_stack {
-        context.namespace_stack.pop();
-        context.parent_id_stack.pop();
+        context.pop();
       }
     }
 
     fn handle_node(&self, node: Node, source: &str, context: &mut ProcessingContext) -> bool;
 
-    fn create_symbol(&self, node: Node, source: &str, context: &mut ProcessingContext) -> Symbol;
+    //fn create_symbol(&self, node: Node, source: &str, context: &mut ProcessingContext) -> Symbol;
 
-    fn get_symbol_name(&self, node: Node, source: &str) -> String;
+    //fn get_symbol_name(&self, node: Node, source: &str) -> String;
 }

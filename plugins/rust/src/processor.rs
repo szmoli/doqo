@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use common::{Documentation, LanguageProcessor, Symbol, SymbolTable, processor::{NodeHandler, ProcessingContext}};
 use tree_sitter::Node;
 
-use crate::handlers::{handle_struct_item};
+use crate::handlers::{handle_enum_item, handle_enum_variant, handle_function_item, handle_line_comment, handle_mod_item, handle_struct_item, handle_trait_item};
 
 pub struct RustProcessor {
   //fn(node: Node, source: &'static str, context: ProcessingContext)
@@ -15,14 +15,16 @@ impl RustProcessor {
     let mut handlers: HashMap<&'static str, NodeHandler> = HashMap::new();
 
     handlers.insert("struct_item", handle_struct_item);
+    handlers.insert("enum_item", handle_enum_item);
+    handlers.insert("enum_variant", handle_enum_variant);
+    handlers.insert("function_item", handle_function_item);
+    handlers.insert("trait_item", handle_trait_item);
+    handlers.insert("mod_item", handle_mod_item);
+    handlers.insert("line_comment", handle_line_comment);
 
     Self {
       handlers: handlers
     }
-  }
-
-  pub fn register_handler(&mut self, kind: &'static str, handler: NodeHandler) -> Option<NodeHandler> {
-    self.handlers.insert(kind, handler)
   }
 }
 
@@ -38,61 +40,19 @@ impl LanguageProcessor for RustProcessor {
         source: &str,
         context: &mut common::processor::ProcessingContext,
     ) -> bool {
-      
-        //match node.kind() {
-        //    "function_item" | "struct_item" | "mod_item" | "impl_item" | "trait_item" | "enum_item" | "const_item" | "field_declaration" => {
-        //        let symbol = self.create_symbol(node, source, context);
+        if let Some(handler) = self.handlers.get(node.kind()) {
+          handler(node, source, context)
+        }
+        else {
+          if node.is_named() {
+            // TODO: clear comment buffer
+          }
 
-        //        //println!("{:?}", symbol);
-        //        //print_named_children(node, source);
-        //        //println!();
-
-        //        let symbol_name = symbol.name.clone();
-        //        
-        //        let symbol_id = context.register_symbol(symbol);
-
-        //        context.namespace_stack.push(symbol_name);
-        //        context.parent_id_stack.push(symbol_id);
-        //        //context.symbols.push(symbol);
-
-        //        true
-        //    }
-        //    //"doc_comment" => {
-        //    "line_comment" | "block_comment" => {
-        //        let text = source[node.byte_range()].trim();
-
-        //        if text.starts_with("//!") || text.starts_with("/*!") {
-        //            // INNER DOCS: Attach to the current active parent
-        //            if let Some(&parent_id) = context.parent_id_stack.last() {
-        //                context.symbol_table.attach_documentation(parent_id, Documentation::new(text.to_string()));
-        //            }
-        //        } else if text.starts_with("///") || text.starts_with("/**") {
-        //            // OUTER DOCS: Buffer for the next sibling
-        //            context.comment_buffer.push_str(text);
-        //        }
-
-        //        //context.comment_buffer.push_str(&source[node.byte_range()].to_string());
-
-        //        false
-        //    }
-        //    _ => {
-        //      //println!("comment_buffer:");
-        //      //println!("{}", context.comment_buffer);
-        //      //context.comment_buffer.clear();
-        //      //println!("cleared comment_buffer");
-
-        //      false
-        //    }
-        //}
-
-        let handler = self.handlers.get(node.kind());
-        
-        match handler {
-            Some(handler) => handler(node, source, context),
-            None => false
+          false
         }
     }
 
+    /* 
     fn create_symbol(
         &self,
         node: tree_sitter::Node,
@@ -118,7 +78,9 @@ impl LanguageProcessor for RustProcessor {
 
         Symbol::new(symbol_name, symbol_kind, symbol_namespace, symbol_source, None)
     }
+    */
 
+    /*
     fn get_symbol_name(&self, node: Node, source: &str) -> String {
         let identifier_node = node.child_by_field_name("name");
         let trait_node = node.child_by_field_name("trait");
@@ -141,5 +103,6 @@ impl LanguageProcessor for RustProcessor {
             }
         }
     }
+    */
 }
 
