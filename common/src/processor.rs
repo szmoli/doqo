@@ -27,6 +27,7 @@ impl<'a> ProcessingContext<'a> {
   }
 
   /// Makes a new Documentation from the comment buffer.
+  /// 
   /// Side effect: clears the comment buffer.
   pub fn make_documentation(&mut self) -> Option<Documentation> {
     if !self.comment_buffer.is_empty() {
@@ -71,28 +72,6 @@ impl<'a> ProcessingContext<'a> {
   pub fn append_comment(&mut self, text: &str) {
     self.comment_buffer.push_str(text);
   }
-
-  /*
-  pub fn register_symbol(&mut self, mut symbol: Symbol) -> SymbolId {
-    symbol.parent = self.parent_id_stack.last().copied();
-
-    // TODO: work out comment attaching logic
-    
-    if !self.comment_buffer.is_empty() {
-      symbol.documentation = Some(Documentation::new(self.comment_buffer.clone()));
-      self.comment_buffer.clear();
-    }
-    
-
-    let id = self.symbol_table.register_symbol(symbol);
-
-    if let Some(&parent_id) = self.parent_id_stack.last() {
-      self.symbol_table.link_child(parent_id, id);
-    }
-
-    id
-  }
-  */
 }
 
 /// Processes a specific language into symbols.

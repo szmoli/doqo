@@ -43,8 +43,10 @@ impl LanguageProcessor for RustProcessor {
           handler(node, source, context)
         }
         else {
-          if node.is_named() {
+          // TODO: comment logic still not clear
+          if !node.is_named() {
             // TODO: clear comment buffer
+            let _documentation = context.make_documentation();
           }
 
           false
