@@ -5,13 +5,13 @@ use crate::{LanguageRegistry, SymbolTable};
 /// Q: A session fogja a saját fájljain végig hívni a LanguageProcessor extract_symbols függvényét, majd hozzáadni azokat a symbol_table-höz?
 pub struct Session {
   /// Symbol table for the session.
-  pub symbol_table: SymbolTable,
+  symbol_table: SymbolTable,
 
   /// Language plugins for the session.
-  pub language_registry: LanguageRegistry,
+  language_registry: LanguageRegistry,
 
   /// Source files of the project.
-  pub source_files: Vec<String>,
+  source_files: Vec<String>,
 }
 
 impl Session {

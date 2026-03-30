@@ -128,7 +128,7 @@ pub fn handle_mod_item(node: Node, source: &str, context: &mut ProcessingContext
 }
 
 pub fn handle_source_file(node: Node, source: &str, context: &mut ProcessingContext) -> bool {
-  // TODO
+  // TODO: Session will set the compilation unit in the ProcessingContext. This will become a top level symbol. Top level inner-docs will attach to this symbol.
   false
 }
 
@@ -142,6 +142,7 @@ pub fn handle_line_comment(node: Node, source: &str, context: &mut ProcessingCon
   if let Some(_inner_marker) = node.child_by_field_name("inner") {
     if let Some(content) = node.child_by_field_name("doc").map(|n| &source[n.byte_range()]) {
       // TODO: append to parent
+      println!("Inner docs:\n\t{}", content);
     }
   }
 
@@ -150,5 +151,10 @@ pub fn handle_line_comment(node: Node, source: &str, context: &mut ProcessingCon
 
 pub fn handle_block_comment(node: Node, source: &str, context: &mut ProcessingContext) -> bool {
   // TODO
+  false
+}
+
+pub fn handle_const_item(node: Node, source: &str, context: &mut ProcessingContext) -> bool {
+  let _docs = context.make_documentation();
   false
 }

@@ -3,10 +3,11 @@ use std::collections::HashMap;
 use common::{Documentation, LanguageProcessor, Symbol, SymbolTable, processor::{NodeHandler, ProcessingContext}};
 use tree_sitter::Node;
 
-use crate::handlers::{handle_enum_item, handle_enum_variant, handle_function_item, handle_line_comment, handle_mod_item, handle_struct_item, handle_trait_item};
+use crate::handlers::{handle_const_item, handle_enum_item, handle_enum_variant, handle_function_item, handle_line_comment, handle_mod_item, handle_struct_item, handle_trait_item};
 
 pub struct RustProcessor {
   handlers: HashMap<&'static str, NodeHandler>,
+  // TODO: make a blacklist for comment clearing.
 }
 
 impl RustProcessor {
@@ -20,6 +21,7 @@ impl RustProcessor {
     handlers.insert("trait_item", handle_trait_item);
     handlers.insert("mod_item", handle_mod_item);
     handlers.insert("line_comment", handle_line_comment);
+    handlers.insert("const_item", handle_const_item);
 
     Self {
       handlers: handlers
