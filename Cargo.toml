@@ -3,7 +3,8 @@ resolver = "3"
 members = [
   "cli",
   "common", 
-  "plugins/*"
+  "plugins/*",
+  "generators/*"
 ]
 
 [workspace.dependencies]
