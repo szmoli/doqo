@@ -1,0 +1,260 @@
+{
+  "symbols": {
+    "11": {
+      "kind": "mod_item",
+      "fqid": "internal_api",
+      "documentation": {
+        "source": "pub mod internal_api {\n    //! This inner comment belongs to `internal_api`.\n\n    /// A struct inside a module.\n    pub struct HiddenManager;\n\n    impl HiddenManager {\n        /// A method inside an impl block.\n        /// This is a \"Grandchild\" of the `internal_api` module.\n        pub fn secret_function() -> bool {\n            true\n        }\n    }\n\n    impl Worker for HiddenManager {\n\n    }\n\n    /// Sub-nesting: A module inside a module.\n    pub mod ultra_private {\n        /// A deeply nested function.\n        /// FQID: `test_suite::internal_api::ultra_private::deep_dive`\n        pub fn deep_dive() {}\n    }\n}",
+        "comments": [
+          "/// A nested module to test \"Scope\" logic.\n",
+          "/// Your Symbol Table should link these symbols to this module ID.\n",
+          " This inner comment belongs to `internal_api`.\n"
+        ]
+      },
+      "parent": null,
+      "children": [
+        12,
+        13,
+        14
+      ]
+    },
+    "8": {
+      "kind": "enum_variant",
+      "fqid": "Signal::Stop",
+      "documentation": {
+        "source": "Stop { \n        /// Reason for stopping.\n        reason: String, \n        /// Error code.\n        code: i32 \n    }",
+        "comments": [
+          "/// A data-carrying signal.\n"
+        ]
+      },
+      "parent": 6,
+      "children": [
+        9,
+        10
+      ]
+    },
+    "12": {
+      "kind": "struct_item",
+      "fqid": "internal_api::HiddenManager",
+      "documentation": {
+        "source": "pub struct HiddenManager;",
+        "comments": [
+          "/// A struct inside a module.\n"
+        ]
+      },
+      "parent": 11,
+      "children": []
+    },
+    "6": {
+      "kind": "enum_item",
+      "fqid": "Signal",
+      "documentation": {
+        "source": "pub enum Signal {\n    /// The start signal.\n    Start,\n    /// A data-carrying signal.\n    Stop { \n        /// Reason for stopping.\n        reason: String, \n        /// Error code.\n        code: i32 \n    },\n}",
+        "comments": [
+          "/// An enum to test nested variants.\n"
+        ]
+      },
+      "parent": null,
+      "children": [
+        7,
+        8
+      ]
+    },
+    "2": {
+      "kind": "field_declaration",
+      "fqid": "Manager::name",
+      "documentation": {
+        "source": "pub name: &'a str",
+        "comments": [
+          "/// A public field with docs.\n"
+        ]
+      },
+      "parent": 1,
+      "children": []
+    },
+    "14": {
+      "kind": "mod_item",
+      "fqid": "internal_api::ultra_private",
+      "documentation": {
+        "source": "pub mod ultra_private {\n        /// A deeply nested function.\n        /// FQID: `test_suite::internal_api::ultra_private::deep_dive`\n        pub fn deep_dive() {}\n    }",
+        "comments": [
+          "/// Sub-nesting: A module inside a module.\n"
+        ]
+      },
+      "parent": 11,
+      "children": [
+        15
+      ]
+    },
+    "17": {
+      "kind": "mod_item",
+      "fqid": "tests",
+      "documentation": {
+        "source": "mod tests {\n    /// This should likely be filtered out by your \"Public API\" logic.\n    #[test]\n    fn test_internal_logic() {\n        assert!(true);\n    }\n}",
+        "comments": []
+      },
+      "parent": null,
+      "children": [
+        18
+      ]
+    },
+    "10": {
+      "kind": "field_declaration",
+      "fqid": "Signal::Stop::code",
+      "documentation": {
+        "source": "code: i32",
+        "comments": [
+          "/// Error code.\n"
+        ]
+      },
+      "parent": 8,
+      "children": []
+    },
+    "15": {
+      "kind": "function_item",
+      "fqid": "internal_api::ultra_private::deep_dive",
+      "documentation": {
+        "source": "pub fn deep_dive() {}",
+        "comments": [
+          "/// A deeply nested function.\n",
+          "/// FQID: `test_suite::internal_api::ultra_private::deep_dive`\n"
+        ]
+      },
+      "parent": 14,
+      "children": []
+    },
+    "18": {
+      "kind": "function_item",
+      "fqid": "tests::test_internal_logic",
+      "documentation": {
+        "source": "fn test_internal_logic() {\n        assert!(true);\n    }",
+        "comments": [
+          "/// This should likely be filtered out by your \"Public API\" logic.\n"
+        ]
+      },
+      "parent": 17,
+      "children": []
+    },
+    "4": {
+      "kind": "trait_item",
+      "fqid": "Worker",
+      "documentation": {
+        "source": "pub trait Worker {\n    /// A trait method with a default implementation.\n    fn perform_task(&self) {\n        println!(\"Task started.\");\n    }\n}",
+        "comments": [
+          "/// Traits define shared behavior.\n"
+        ]
+      },
+      "parent": null,
+      "children": [
+        5
+      ]
+    },
+    "3": {
+      "kind": "field_declaration",
+      "fqid": "Manager::data",
+      "documentation": {
+        "source": "data: Vec<T>",
+        "comments": [
+          "/// A private field (should your extractor show this?).\n"
+        ]
+      },
+      "parent": 1,
+      "children": []
+    },
+    "0": {
+      "kind": "const_item",
+      "fqid": "GLOBAL_TIMEOUT",
+      "documentation": {
+        "source": "pub const GLOBAL_TIMEOUT: u64 = 30;",
+        "comments": [
+          "/// A top-level constant.\n"
+        ]
+      },
+      "parent": null,
+      "children": []
+    },
+    "1": {
+      "kind": "struct_item",
+      "fqid": "Manager",
+      "documentation": {
+        "source": "pub struct Manager<'a, T> {\n    //! This should be attached to the Manager. :)\n\n    /// A public field with docs.\n    pub name: &'a str,\n    /// A private field (should your extractor show this?).\n    data: Vec<T>,\n}",
+        "comments": [
+          "/// The primary data structure for the test suite.\n",
+          "/// This struct has generics and lifetimes to test your string parsing.\n",
+          " This should be attached to the Manager. :)\n"
+        ]
+      },
+      "parent": null,
+      "children": [
+        2,
+        3
+      ]
+    },
+    "5": {
+      "kind": "function_item",
+      "fqid": "Worker::perform_task",
+      "documentation": {
+        "source": "fn perform_task(&self) {\n        println!(\"Task started.\");\n    }",
+        "comments": [
+          "/// A trait method with a default implementation.\n"
+        ]
+      },
+      "parent": 4,
+      "children": []
+    },
+    "13": {
+      "kind": "function_item",
+      "fqid": "internal_api::secret_function",
+      "documentation": {
+        "source": "pub fn secret_function() -> bool {\n            true\n        }",
+        "comments": [
+          "/// A method inside an impl block.\n",
+          "/// This is a \"Grandchild\" of the `internal_api` module.\n"
+        ]
+      },
+      "parent": 11,
+      "children": []
+    },
+    "7": {
+      "kind": "enum_variant",
+      "fqid": "Signal::Start",
+      "documentation": {
+        "source": "Start",
+        "comments": [
+          "/// The start signal.\n"
+        ]
+      },
+      "parent": 6,
+      "children": []
+    },
+    "16": {
+      "kind": "function_item",
+      "fqid": "process_data",
+      "documentation": {
+        "source": "pub async fn process_data<F>(input: F) -> Result<(), String> \nwhere F: Fn(u32) -> bool {\n    Ok(())\n}",
+        "comments": [
+          "/// A function with complex arguments.\n",
+          "/// \n",
+          "/// # Arguments\n",
+          "/// * `input` - The raw data to process.\n"
+        ]
+      },
+      "parent": null,
+      "children": []
+    },
+    "9": {
+      "kind": "field_declaration",
+      "fqid": "Signal::Stop::reason",
+      "documentation": {
+        "source": "reason: String",
+        "comments": [
+          "/// Reason for stopping.\n"
+        ]
+      },
+      "parent": 8,
+      "children": []
+    }
+  },
+  "fqid_index": {},
+  "current_id": 19
+}
