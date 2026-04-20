@@ -131,7 +131,6 @@ pub fn handle_mod_item(node: Node, source: &str, context: &mut ProcessingContext
 }
 
 pub fn handle_source_file(node: Node, source: &str, context: &mut ProcessingContext) -> bool {
-  // TODO: Session will set the compilation unit in the ProcessingContext. This will become a top level symbol. Top level inner-docs will attach to this symbol.
   let name = context.filename().to_string();
   let symbol = create_symbol(node, source, &name, context);
 

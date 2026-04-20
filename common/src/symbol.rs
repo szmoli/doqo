@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
+use ts_rs::TS;
 
 use crate::{Documentation};
 
@@ -10,10 +11,10 @@ pub type SymbolId = usize;
 
 /// The symbol table. Maps IDs or FQIDs to Symbols.
 /// The current_id starts from 0 and is incremented every time a new symbol is registered. 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, TS)]
+#[ts(export)]
 pub struct SymbolTable {
   pub symbols: HashMap<SymbolId, Symbol>,
-  #[serde(skip_serializing)]
   fqid_index: HashMap<String, SymbolId>,
   #[serde(skip_serializing)]
   current_id: SymbolId,
@@ -29,7 +30,7 @@ impl SymbolTable {
     }
 
     /// Get the internal ID mapped to the FQID.
-    pub fn symbol_id(&self, fqid: &String) -> Option<&SymbolId> {
+    pub fn symbol_id(&self, fqid: &str) -> Option<&SymbolId> {
         self.fqid_index.get(fqid)
     }
 
@@ -37,6 +38,7 @@ impl SymbolTable {
     /// Side effect: incements current_id by one.
     pub fn register_symbol(&mut self, symbol: Symbol) -> SymbolId {
         let id = self.current_id;
+        self.fqid_index.insert(symbol.fqid().to_string(), id);
         self.symbols.insert(id, symbol);
         self.current_id += 1;
         id
@@ -78,7 +80,8 @@ impl SymbolTable {
 }
 
 /// Holds information about a single symbol in the source.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, TS)]
+#[ts(export)]
 pub struct Symbol {
   /// Path of the scopes leading to the symbol.
   //scope: Vec<String>,

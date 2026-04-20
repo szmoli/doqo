@@ -11,7 +11,6 @@ use crate::handlers::{
 pub struct RustProcessor {
     handlers: HashMap<&'static str, NodeHandler>,
     comment_clearers: HashSet<&'static str>,
-    // TODO: make a blacklist for comment clearing.
 }
 
 impl RustProcessor {
@@ -53,7 +52,6 @@ impl LanguageProcessor for RustProcessor {
         if let Some(handler) = self.handlers.get(node.kind()) {
             handler(node, source, context)
         } else {
-            // TODO: comment logic still not clear
             if self.comment_clearers.contains(node.kind()) {
                 let _comment = context.take_comments(); // clear comments
             }

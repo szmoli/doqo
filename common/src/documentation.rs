@@ -1,6 +1,8 @@
 use serde::{Serialize, Deserialize};
+use ts_rs::TS;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, TS)]
+#[ts(export)]
 pub struct Documentation {
   pub source: String,
   comments: Vec<String>,
