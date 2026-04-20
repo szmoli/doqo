@@ -144,13 +144,15 @@ pub fn handle_source_file(node: Node, source: &str, context: &mut ProcessingCont
 
 pub fn handle_line_comment(node: Node, source: &str, context: &mut ProcessingContext) -> bool {
   if let Some(_outer_marker) = node.child_by_field_name("outer") {
-    context.push_comment(&source[node.byte_range()]);
+    if let Some(content) = node.child_by_field_name("doc").map(|n| &source[n.byte_range()]) {
+      context.push_comment(content.trim());
+    }
   }
 
   if let Some(_inner_marker) = node.child_by_field_name("inner") {
     if let Some(content) = node.child_by_field_name("doc").map(|n| &source[n.byte_range()]) {
       if let Some(symbol) = context.top_mut() {
-        symbol.append_comment(content);
+        symbol.append_comment(content.trim());
       }
     }
   }
