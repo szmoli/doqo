@@ -2,6 +2,7 @@ pub mod plugin;
 pub mod processor;
 pub mod utility;
 
+mod source;
 mod documentation;
 mod session;
 mod symbol;

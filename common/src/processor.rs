@@ -1,6 +1,6 @@
-use std::{ffi::OsStr, fs, mem::take, path::Path};
+use std::{ffi::OsStr, fs, mem::take, path::{Path, PathBuf}};
 
-use crate::{Symbol, SymbolId, SymbolTable};
+use crate::{Symbol, SymbolId, SymbolTable, source::{self, FileId, SourceFile}};
 use tree_sitter::{Node, Parser};
 
 pub type NodeHandler = fn(node: Node, source: &str, &mut ProcessingContext) -> bool;
@@ -12,20 +12,28 @@ pub struct ProcessingContext<'a> {
   comment_buffer: Vec<String>,
   symbol_table: &'a mut SymbolTable,
   id_scope: Vec<SymbolId>,
-  source_filename: String,
+  file_id: FileId,
 }
 
 impl<'a> ProcessingContext<'a> {
 //impl ProcessingContext {
-  pub fn new(symbol_table: &'a mut SymbolTable, source_filename: &str) -> Self {
+  pub fn new(symbol_table: &'a mut SymbolTable, file_id: FileId) -> Self {
   //pub fn new() -> Self {
     Self {
       scope: Vec::new(),
       comment_buffer: Vec::new(),
       symbol_table: symbol_table,
       id_scope: Vec::new(),
-      source_filename: String::from(source_filename),
+      file_id: file_id,
     }
+  }
+
+  pub fn file_id(&self) -> &FileId {
+    &self.file_id
+  }
+
+  pub fn file(&self) -> &SourceFile {
+    &self.symbol_table.sources.get(&self.file_id).expect("File not registered")
   }
 
   /// Makes a new Documentation from the comment buffer.
@@ -77,10 +85,6 @@ impl<'a> ProcessingContext<'a> {
   pub fn push_comment(&mut self, text: &str) {
     self.comment_buffer.push(String::from(text));
   }
-
-  pub fn filename(&self) -> &str {
-    &self.source_filename
-  }
 }
 
 /// Processes a specific language into symbols.
@@ -89,10 +93,13 @@ pub trait LanguageProcessor {
     fn language(&self) -> tree_sitter::Language;
 
     /// Extract the symbols from a source string.
-    fn process(&self, source_path: &Path, symbol_table: &mut SymbolTable) {
-        let source = fs::read_to_string(&source_path).expect("Failed to read input");
-        let filename = source_path.file_name().and_then(|f| f.to_str()).unwrap_or("unknown_file");
-        let mut context = ProcessingContext::new(symbol_table, &filename);
+    fn process(&self, source_path: &PathBuf, symbol_table: &mut SymbolTable) {
+        //let source = fs::read_to_string(&source_path).expect("Failed to read input");
+        //let filename = source_path.file_name().and_then(|f| f.to_str()).unwrap_or("unknown_file");
+        let file_id = symbol_table.register_file(source_path.to_path_buf());
+        let source = symbol_table.source(&file_id);
+
+        let mut context = ProcessingContext::new(symbol_table, file_id);
 
         let mut parser = Parser::new();
         parser

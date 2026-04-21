@@ -2,18 +2,18 @@ use serde::{Serialize, Deserialize};
 use ts_rs::TS;
 
 #[derive(Debug, Serialize, Deserialize, TS)]
-#[ts(export)]
+#[ts(export, rename = "DoqoDocumentation")]
 pub struct Documentation {
-  pub source: String,
+  //pub source: String,
   comments: Vec<String>,
   //range: std::ops::Range<usize>,
   //metadata: Vec<Metadata>,
 }
 
 impl Documentation {
-  pub fn new(source: &str, comments: &[String]) -> Self {
+  pub fn new(comments: &[String]) -> Self {
     Self {
-      source: String::from(source),
+      //source: String::from(source),
       comments: Vec::from(comments)
     }
   }
