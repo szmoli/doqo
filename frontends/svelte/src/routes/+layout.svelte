@@ -18,7 +18,7 @@
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
 <div class="flex h-screen">
-	<aside class="overflow-y-auto border-r border-black px-2">
+	<aside class="overflow-y-auto border-r border-slate-200 px-2">
 		<header class="flex items-center justify-between border-b border-slate-200 py-4 ">
 				<SearchBar {symbolTable} />
 		</header>

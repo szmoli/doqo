@@ -1,6 +1,20 @@
-//! # Stress Test Module
-//! This is a module-level doc comment. 
-//! It should be associated with the "root" or the file itself.
+//! # Markdown support test
+//! 
+//! The frontend should render this as *Markdown*.
+//! 
+//! This is a list:
+//! - Element 1
+//! - Element 2
+//! - Element 3
+//! 
+//! Here is some **inline** code: `let foo = "bar";`.
+//! 
+//! Here is a code snippet:
+//! ``` rust
+//! function foo() -> &str {
+//!   "bar"
+//! }
+//! ```
 
 /// A top-level constant.
 pub const GLOBAL_TIMEOUT: u64 = 30; // regular line comment
