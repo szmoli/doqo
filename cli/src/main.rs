@@ -5,6 +5,7 @@ use std::{
 
 use common::Session;
 use rust::plugin::RustPlugin; // manual imports for now
+use typescript::plugin::TypeScriptPlugin;
 
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
@@ -59,6 +60,7 @@ fn main() -> Result<()> {
         Session::new(cli.input, &cli.ignore).context("Failed to initialize doqo session.")?;
 
     let _rust_plugin_id = session.register_plugin(Box::new(RustPlugin)); // manual registering for now
+    let _typescript_plugin_id = session.register_plugin(Box::new(TypeScriptPlugin));
 
     session.scan_sources().context("Failed to scan sources.")?;
 

@@ -40,7 +40,7 @@ pub struct Registry {
     current_source_id: SourceId,
     #[serde(skip_serializing)]
     #[ts(skip)]
-    current_plugin_id: SourceId,
+    current_plugin_id: PluginId,
 }
 
 impl Registry {

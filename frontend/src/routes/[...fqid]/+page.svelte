@@ -14,7 +14,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch('registry.json');
+      const response = await fetch('/registry.json');
       registry = await response.json();
     } catch (e) {
       console.error("Failed to load registry", e);

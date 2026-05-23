@@ -23,5 +23,15 @@ export function pathToFqid(path: string): string {
 
 export function source(symbol: DoqoSymbol, registry: DoqoRegistry): string {
   const source = registry.sources[symbol.span.source_id];
-  return source.content.slice(symbol.span.start, symbol.span.end)
+  
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const bytes = encoder.encode(source.content);
+  
+  const slicedBytes = bytes.slice(symbol.span.start, symbol.span.end);
+  
+  const source_slice = decoder.decode(slicedBytes);
+  
+  console.debug(`Symbol: ${symbol.fqid}\nSource (${symbol.span.source_id}: ${symbol.span.start}-${symbol.span.end}):\n${source_slice}`);
+  return source_slice;
 }
