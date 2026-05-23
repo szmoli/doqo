@@ -1,0 +1,54 @@
+@startuml 
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classFontSize 14
+skinparam classAttributeFontSize 12
+
+title doqo - Modulok és Interfészek (Prezentáció)
+
+package "CLI Modul" {
+    class CLI {
+        + main()
+    }
+}
+
+package "Common Modul" {
+    class Session
+    class Registry
+    
+    interface LanguagePlugin {
+        + processor()
+    }
+    
+    interface LanguageProcessor {
+        + process()
+        + walk_recursive()
+    }
+    
+    class ProcessingContext
+}
+
+package "Plugins Modul" {
+    class RustPlugin
+    class RustProcessor
+}
+
+package "Fájlrendszer (Kimenet)" {
+    class "Registry JSON" as json
+    class "Svelte Frontend" as web
+}
+
+' Kapcsolatok tisztán, egyszerűen
+CLI -> Session : indít
+Session *- Registry
+
+Registry "1" o- LanguagePlugin
+LanguagePlugin .> LanguageProcessor : gyártja
+LanguageProcessor .> ProcessingContext : használja
+
+RustPlugin .up.|> LanguagePlugin
+RustProcessor .up.|> LanguageProcessor
+
+CLI .down.> json : ment
+CLI .down.> web : generál
+@enduml

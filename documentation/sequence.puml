@@ -1,0 +1,93 @@
+@startuml doqo_spec_sequence_v3
+autonumber
+skinparam boxPadding 10
+
+title doqo - Részletes Feldolgozási Szekvencia
+
+actor Felhasználó
+
+box "CLI Modul" #LightBlue
+    participant "CLI" as cli
+end box
+
+box "Common Modul" #LightGreen
+    participant "Session" as session
+    participant "Registry" as registry
+    participant "Ctx: ProcessingContext" as ctx
+end box
+
+box "Plugins Modul" #LightPink
+    participant "RustPlugin" as plugin
+    participant "Proc: RustProcessor" as processor
+end box
+
+database "Diszk" #LightGray
+    participant "Fájlrendszer" as fs
+
+Felhasználó -> cli : Alkalmazás indítása
+activate cli
+
+cli -> session : Létrehoz egy Sessiont
+activate session
+
+cli -> plugin : Létrehozás (LanguagePlugin impl)
+activate plugin
+
+cli -> session : Regisztrálja a konkrét RustPlugint
+session -> registry : Regisztrálás a Registry-be
+activate registry
+registry -> plugin : id(), name(), extensions() lekérése
+plugin --> registry : Metaadatok visszaadása
+registry --> session : Gyorsítótárak frissítve
+deactivate registry
+deactivate plugin
+
+cli -> session : scan_sources()
+session -> fs : Rekurzív keresés (.doqoignore alapján)
+fs --> session : Talált forrásfájlok listája
+
+cli -> session : process()
+loop minden megtalált Rust forrásfájlra
+    session -> plugin : processor() lekérése
+    activate plugin
+    plugin --> session : Box<dyn LanguageProcessor> (RustProcessor)
+    deactivate plugin
+    
+    session -> processor : process(source_id, registry)
+    activate processor
+    
+    processor -> registry : get_source(&source_id)
+    registry --> processor : source_rc (forráskód tartalma)
+    
+    processor -> processor : Parser::new() & set_language()
+    processor -> processor : parser.parse(content) -> Tree
+    
+    processor -> ctx : new(registry, source_id, source_rc)
+    activate ctx
+    
+    processor -> processor : walk_recursive(root_node, content, ctx)
+    activate processor
+    
+    loop AST rekurzív bejárása (minden named_children-re)
+        processor -> processor : handle_node(node, source, ctx)
+        note over processor : true-t ad vissza, ha\núj scope jött létre
+        
+        processor -> processor : walk_recursive(child, source, ctx)
+        
+        alt ha a handle_node true volt
+            processor -> ctx : exit_scope()
+        end
+    end
+    deactivate processor
+    
+    deactivate ctx
+    processor --> session : kész
+    deactivate processor
+end
+
+cli -> fs : Kiírja a szimbólumokat egy JSON-be (DoqoRegistry)
+cli -> fs : Kiírja a generált dokumentációt a diszkre (Svelte SPA)
+
+deactivate session
+return Folyamat vége (Siker)
+@enduml

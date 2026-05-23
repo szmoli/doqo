@@ -1,0 +1,43 @@
+@startuml doqo_slide_sequence_fixed
+autonumber
+skinparam boxPadding 5
+skinparam participantFontSize 14
+skinparam arrowFontSize 12
+
+title doqo - Feldolgozási Folyamat (Prezentáció)
+
+box "CLI" #LightBlue
+    participant "CLI" as cli
+end box
+box "Common" #LightGreen
+    participant "Session / Registry" as common
+end box
+box "Plugins" #LightPink
+    participant "Rust Plugin & Proc" as plugin
+end box
+box "Diszk" #LightGray
+    participant "Fájlrendszer" as fs
+end box
+
+cli -> common : 1. Session inicializálása
+cli -> common : 2. RustPlugin regisztrálása
+cli -> common : 3. scan_sources() (Bejárás)
+common -> fs : Forrásfájlok keresése
+fs --> common : Fájlok listája
+
+cli -> common : 4. process() (Feldolgozás)
+loop minden forrásfájlra
+    common -> plugin : process(file, registry)
+    activate plugin
+    plugin -> plugin : Tree-sitter AST generálás
+    
+    loop AST Fa Bejárása (Rekurzió)
+        plugin -> plugin : handle_node()
+    end
+    
+    plugin --> common : Kész
+    deactivate plugin
+end
+
+cli -> fs : 5. JSON mentése & Svelte Frontend kiírása
+@enduml

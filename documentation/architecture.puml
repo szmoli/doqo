@@ -1,0 +1,85 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+allowmixing
+
+title doqo - Részletes Architektúra és Interfészek
+
+package "CLI Modul" {
+    class CLI {
+        + main()
+    }
+}
+
+package "Common Modul" {
+    class Session {
+        - registry: Registry
+        - project_path: PathBuf
+        - ignore_set: GlobSet
+    }
+
+    class Registry {
+        - plugins: HashMap<PluginId, Rc<Box<dyn LanguagePlugin>>>
+        - sources: HashMap<SourceId, Rc<Source>>
+        - symbols: HashMap<SymbolId, Symbol>
+        + get_source(id: &SourceId): Option<Rc<Source>>
+    }
+
+    interface LanguagePlugin {
+        + name(): &'static str
+        + id(): &'static str
+        + extensions(): HashSet<&'static str>
+        + processor(): Box<dyn LanguageProcessor>
+    }
+
+    interface LanguageProcessor {
+        + language(): tree_sitter::Language
+        + process(source_id: SourceId, registry: &mut Registry)
+        + walk_recursive(node: Node, source: &str, ctx: &mut ProcessingContext)
+        + handle_node(node: Node, source: &str, ctx: &mut ProcessingContext): bool
+    }
+
+    class ProcessingContext {
+        - registry: &mut Registry
+        - source_id: SourceId
+        - source_rc: Rc<Source>
+        + exit_scope()
+    }
+}
+
+package "Plugins Modul" {
+    class RustPlugin {
+        + name()
+        + id()
+        + extensions()
+        + processor()
+    }
+    
+    class RustProcessor {
+        + language()
+        + handle_node()
+    }
+}
+
+database "Fájlrendszer" {
+    artifact "Registry JSON" as json_out
+    artifact "Generált Dokumentáció" as doc_out
+}
+
+' Kapcsolatok
+CLI -right-> Session : létrehozza és vezérli
+Session *-right- Registry : tartalmazza
+
+Registry "1" o-- "*" LanguagePlugin : tárolja
+LanguagePlugin .right.> LanguageProcessor : gyártja
+LanguageProcessor .left.> ProcessingContext : használja a bejáráshoz
+ProcessingContext o-- Registry : hivatkozik rá
+
+' Implementációk
+RustPlugin .up.|> LanguagePlugin
+RustProcessor .up.|> LanguageProcessor
+
+CLI ..> json_out : kiírja a diszkre
+CLI ..> doc_out : kiírja a diszkre
+@enduml
