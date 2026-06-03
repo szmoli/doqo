@@ -23,4 +23,4 @@ Doqo was built on top of these technologies:
 
 ## License
 
-Doqo is distributed under the MIT license. See `LICENSE` for more information.
+Doqo is distributed under the MIT license. See [`LICENSE`](LICENSE) for more information.
