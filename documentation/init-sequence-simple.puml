@@ -1,0 +1,35 @@
+@startuml doqo_initialization_slide
+autonumber
+skinparam boxPadding 15
+skinparam participantFontSize 14
+skinparam arrowFontSize 12
+
+title doqo - Inicializációs Folyamat
+
+participant "1. CLI" as cli #LightGray
+participant "2. Session" as session #LightGreen
+participant "3. Plugin" as plugin #LightBlue
+participant "4. Registry" as registry #LightSteelblue
+participant "5. Fájlrendszer" as fs #LightPink
+
+cli -> session : Indítás és argumentum kezelés
+activate session
+
+session -> plugin : Nyelvi plugin(ok) betöltése
+activate plugin
+
+plugin -> registry : Plugin(ok) regisztrálása
+deactivate plugin
+activate registry
+
+registry --> session : Plugin(ok) regisztálva
+deactivate registry
+
+session -> fs : Könyvtárfa scannelése (.doqoignore)
+activate fs
+
+fs --> session : Szűrt forrásfájlok listája
+deactivate fs
+deactivate session
+
+@enduml

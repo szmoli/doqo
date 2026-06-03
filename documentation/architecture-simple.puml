@@ -4,7 +4,7 @@ skinparam shadowing false
 skinparam classFontSize 14
 skinparam classAttributeFontSize 12
 
-title doqo - Modulok és Interfészek (Prezentáció)
+title doqo - Architektúra
 
 package "CLI Modul" {
     class CLI {
@@ -42,7 +42,7 @@ package "Fájlrendszer (Kimenet)" {
 CLI -> Session : indít
 Session *- Registry
 
-Registry "1" o- LanguagePlugin
+Registry o- LanguagePlugin
 LanguagePlugin .> LanguageProcessor : gyártja
 LanguageProcessor .> ProcessingContext : használja
 

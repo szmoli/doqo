@@ -1,0 +1,32 @@
+@startuml
+autonumber
+skinparam boxPadding 15
+skinparam participantFontSize 14
+skinparam arrowFontSize 12
+
+title doqo - Feldolgozási folyamat
+
+participant "1. Forráskód" as src #LightGray
+participant "2. Tree-sitter" as ts #LightGreen
+participant "3. Plugin" as doqo #LightBlue
+participant "4. Svelte" as front #LightSteelblue
+participant "5. Warp webszerver" as web #LightPink
+
+src -> ts : Forráskód
+activate ts
+
+ts -> doqo : AST
+deactivate ts
+activate doqo
+
+doqo -> front : JSON
+deactivate doqo
+activate front
+
+front -> web : SPA + JSON
+deactivate front
+activate web
+deactivate web
+
+
+@enduml
